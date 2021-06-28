@@ -26,3 +26,8 @@ variable "cache" {
   description = "Force default cache rule (do you want cache_everything?)"
   default = ""
 }
+
+variable "dnssec" {
+  description = "Enable dnssec on the zone"
+  default = true
+}

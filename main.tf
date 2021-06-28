@@ -41,3 +41,8 @@ resource "cloudflare_page_rule" "cache_all" {
     cache_level = var.cache
   }
 }
+
+resource "cloudflare_zone_dnssec" "zone" {
+  count   = var.dnssec ? 1 : 0
+  zone_id = cloudflare_zone.zone.id
+}
