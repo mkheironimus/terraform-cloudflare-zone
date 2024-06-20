@@ -21,9 +21,10 @@ plan levels and restoring settings on delete.
 
 ```HCL
 module "example_zone" {
-  source   = "../modules/terraform-cloudflare-zone"
-  zone     = "example.com"
-  ssl_type = "full"
+  source     = "../modules/terraform-cloudflare-zone"
+  zone       = "example.com"
+  account_id = "123"
+  ssl_type   = "full"
 }
 
 resource "cloudflare_record" "www_site" {

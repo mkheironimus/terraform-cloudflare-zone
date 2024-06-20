@@ -1,17 +1,18 @@
 terraform {
-  required_version = ">= 0.12.0"
+  required_version = ">= 1.7.0"
   required_providers {
     cloudflare = {
-      source = "cloudflare/cloudflare"
-      version = "~> 2.0"
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
     }
   }
 }
 
 resource "cloudflare_zone" "zone" {
-  zone = var.zone
-  plan = var.plan != "free" ? var.plan : null
-  type = var.zone_type
+  zone       = var.zone
+  account_id = var.account_id
+  plan       = var.plan != "free" ? var.plan : null
+  type       = var.zone_type
 }
 
 resource "cloudflare_zone_settings_override" "settings" {
