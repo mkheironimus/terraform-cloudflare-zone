@@ -3,7 +3,7 @@ terraform {
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "~> 4.0"
+      version = ">= 4.0"
     }
   }
 }
@@ -25,11 +25,6 @@ resource "cloudflare_zone_settings_override" "settings" {
     tls_client_auth   = "off"
     websockets        = "on"
     email_obfuscation = var.email_obfuscation
-    minify {
-      css  = "on"
-      html = "on"
-      js   = "on"
-    }
   }
 }
 
