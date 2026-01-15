@@ -1,31 +1,47 @@
 terraform {
-  required_version = ">= 1.7.0"
+  required_version = ">= 1.14.0"
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = ">= 4.0"
+      version = ">= 5.0"
     }
   }
 }
 
 resource "cloudflare_zone" "zone" {
-  zone       = var.zone
-  account_id = var.account_id
-  plan       = var.plan != "free" ? var.plan : null
-  type       = var.zone_type
+  name    = var.zone
+  account = { id = var.account_id }
+  type    = var.zone_type
 }
 
-resource "cloudflare_zone_settings_override" "settings" {
-  zone_id = cloudflare_zone.zone.id
-  settings {
-    brotli            = "on"
-    ipv6              = "on"
-    always_use_https  = "on"
-    ssl               = var.ssl_type
-    tls_client_auth   = "off"
-    websockets        = "on"
-    email_obfuscation = var.email_obfuscation
-  }
+resource "cloudflare_zone_setting" "always_use_https" {
+  zone_id    = cloudflare_zone.zone.id
+  setting_id = "always_use_https"
+  value      = "on"
+}
+
+resource "cloudflare_zone_setting" "brotli" {
+  zone_id    = cloudflare_zone.zone.id
+  setting_id = "brotli"
+  value      = "on"
+}
+
+resource "cloudflare_zone_setting" "email_obfuscation" {
+  zone_id    = cloudflare_zone.zone.id
+  setting_id = "email_obfuscation"
+  value      = "on"
+}
+
+resource "cloudflare_zone_setting" "ssl" {
+  zone_id    = cloudflare_zone.zone.id
+  setting_id = "ssl"
+  value      = var.ssl_type
+}
+
+resource "cloudflare_zone_setting" "websockets" {
+  zone_id    = cloudflare_zone.zone.id
+  setting_id = "websockets"
+  value      = "on"
 }
 
 resource "cloudflare_page_rule" "cache_all" {
@@ -33,7 +49,7 @@ resource "cloudflare_page_rule" "cache_all" {
   zone_id  = cloudflare_zone.zone.id
   target   = "${var.zone}/*"
   priority = 1
-  actions {
+  actions = {
     cache_level = var.cache
   }
 }
@@ -41,4 +57,5 @@ resource "cloudflare_page_rule" "cache_all" {
 resource "cloudflare_zone_dnssec" "zone" {
   count   = var.dnssec ? 1 : 0
   zone_id = cloudflare_zone.zone.id
+  status  = "active"
 }

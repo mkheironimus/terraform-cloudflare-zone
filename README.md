@@ -42,6 +42,20 @@ Existing zones can be imported using the zone ID.
 terraform import module.example_zone.cloudflare_zone.zone 1234567890abcdef1234567890abcdef
 ```
 
-The Cloudflare provider does not currently (as of version 2) support importing
-the `cloudflare_zone_settings_override` resource, so make sure it's right and
-apply it.
+## Migrating `cloudflare_record` from 4 to 5
+
+Get the records with something like:
+```
+terraform state list | grep 'cloudflare_record\.' | xargs -n1 terraform state show >cloudflare_record.out
+```
+
+Build a file of `removed` blocks:
+```
+awk -F'[ :]' '/^# cloudflare_record\./ { printf("removed {\n  from = %s\n  lifecycle {\n    destroy = false\n  }\n}\n", $2) }' cloudflare_record.out >removed.tf
+```
+
+Comment the resources and apply to clean them from state. Remove the removed.tf (or whatever) and generate the imports:
+
+```
+awk -F'[ :"]*' '/^# cloudflare_record\./ { printf("import {\n  to = %s\n", $2) } /^ *id *= / { RECID=$4 } /^ *zone_id *= / { ZONEID=$4 } /^}/ { printf("  id = \"%s/%s\"\n}\n", ZONEID, RECID) }' cloudflare_record.out |sed -e 's/cloudflare_record/cloudflare_dns_record/' >import.tf
+```
